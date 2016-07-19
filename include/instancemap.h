@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,44 +14,43 @@
  * limitations under the License.
  */
 #pragma once
-#ifndef INSTANCE_MAP
-#define INSTANCE_MAP
+#ifndef ZORBA_JDBC_MODULE_INSTANCEMAP_H
+#define ZORBA_JDBC_MODULE_INSTANCEMAP_H
 
 #include <map>
 #include <string>
 #include <zorba/zorba.h>
 #include "jni.h"
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
-class InstanceMap : public ExternalFunctionParameter
-{
-  private:
-    typedef std::map<String, jobject> InstanceMap_t;
-    InstanceMap_t* instanceMap;
+    class InstanceMap : public ExternalFunctionParameter
+    {
+    private:
+      typedef std::map <String, jobject> InstanceMap_t;
+      InstanceMap_t *instanceMap;
 
-  public:
-    String id;
+    public:
+      String id;
 
-    InstanceMap();
-    
-    bool
-    storeInstance(const String&, jobject);
+      InstanceMap();
 
-    jobject
-    getInstance(const String&);
+      bool
+          storeInstance(const String &, jobject);
 
-    bool
-    deleteInstance(const String&);
+      jobject
+          getInstance(const String &);
 
-    void
-    destroy() throw();
-};
+      bool
+          deleteInstance(const String &);
+
+      void
+          destroy() throw();
+    };
 
 
-}}; // namespace zorba, jdbc
+  }
+}; // namespace zorba, jdbc
 
-#endif
+#endif //ZORBA_JDBC_MODULE_INSTANCEMAP_H

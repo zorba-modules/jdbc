@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,54 +14,53 @@
  * limitations under the License.
  */
 #pragma once
-#ifndef JSON_ITEM_SEQUENCE
-#define JSON_ITEM_SEQUENCE
+#ifndef ZORBA_JDBC_MODULE_JSONITEMSEQUENCE_H
+#define ZORBA_JDBC_MODULE_JSONITEMSEQUENCE_H
 
+#include <jni.h>
 #include <map>
 #include <string>
-#include <jni.h>
 
 #include <zorba/zorba.h>
 #include <zorba/iterator.h>
 #include <zorba/item_sequence.h>
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
-  class JSONItemSequence : public ItemSequence
-  {
+    class JSONItemSequence : public ItemSequence
+    {
     public:
       class JSONIterator : public Iterator
       {
-        protected:
-          bool itOpen;
-          jobject oResultSet;
-          String* columnNames;
-          long* columnTypes;
-          long columnCount;
-          zorba::ItemFactory* itemFactory;
-          jobject oMetadata;
+      protected:
+        bool itOpen;
+        jobject oResultSet;
+        String *columnNames;
+        long *columnTypes;
+        long columnCount;
+        zorba::ItemFactory *itemFactory;
+        jobject oMetadata;
 
-        public:
-          JSONIterator(jobject resultSet):
-            itOpen(false), oResultSet(resultSet),columnNames(NULL),columnCount(0), oMetadata(NULL) {}
+      public:
+        JSONIterator(jobject resultSet) :
+            itOpen(false), oResultSet(resultSet), columnNames(NULL),
+            columnCount(0), oMetadata(NULL) { }
 
-          virtual ~JSONIterator() {
-          }
+        virtual ~JSONIterator() {
+        }
 
-          void
-          open();
+        void
+            open();
 
-          bool
-          next(zorba::Item& aItem);
+        bool
+            next(zorba::Item &aItem);
 
-          void
-          close();
+        void
+            close();
 
-          bool
-          isOpen() const { return itOpen; }
+        bool
+        isOpen() const { return itOpen; }
       };
 
     protected:
@@ -69,15 +68,15 @@ namespace jdbc
 
     public:
       JSONItemSequence(jobject resultSet)
-        : resultSet(resultSet)
-      {}
+          : resultSet(resultSet) { }
 
-      virtual ~JSONItemSequence() {}
+      virtual ~JSONItemSequence() { }
 
-      zorba::Iterator_t 
-        getIterator() { return new JSONIterator(resultSet); }
-  };
+      zorba::Iterator_t
+      getIterator() { return new JSONIterator(resultSet); }
+    };
 
-}}; // namespace zorba, jdbc
+  }
+}; // namespace zorba, jdbc
 
-#endif
+#endif //ZORBA_JDBC_MODULE_JSONITEMSEQUENCE_H

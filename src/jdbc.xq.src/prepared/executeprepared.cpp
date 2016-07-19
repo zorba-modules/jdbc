@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,37 +18,40 @@
 #include "jdbc.h"
 #include <zorba/singleton_item_sequence.h>
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
 
-ItemSequence_t
-ExecutePreparedFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lStatementUUID = JdbcModule::getStringArg(args, 0);
+    ItemSequence_t
+    ExecutePreparedFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lStatementUUID = JdbcModule::getStringArg(args, 0);
 
-  CHECK_CONNECTION
-  Item result;
-  
-  JDBC_MODULE_TRY
-    jobject oPreparedStatement = JdbcModule::getObject(aDynamincContext, lStatementUUID, INSTANCE_MAP_PREPAREDSTATEMENTS);
+      CHECK_CONNECTION;
+      Item result;
 
-    env->CallBooleanMethod(oPreparedStatement, jPreparedStatement.execute);
-    CHECK_EXCEPTION
+      JDBC_MODULE_TRY;
+      jobject oPreparedStatement =
+          JdbcModule::getObject(aDynamincContext,
+                                lStatementUUID,
+                                INSTANCE_MAP_PREPAREDSTATEMENTS);
 
-    InstanceMap* lInstanceMap = JdbcModule::getCreateInstanceMap(aDynamincContext, INSTANCE_MAP_STATEMENTS);
-    String resultUUID = JdbcModule::getUUID();
-    lInstanceMap->storeInstance(resultUUID, oPreparedStatement);
+      env->CallBooleanMethod(oPreparedStatement, jPreparedStatement.execute);
+      CHECK_EXCEPTION;
 
-    result = theFactory->createAnyURI(resultUUID);
+      InstanceMap *lInstanceMap = JdbcModule::getCreateInstanceMap(
+          aDynamincContext, INSTANCE_MAP_STATEMENTS);
+      String resultUUID = JdbcModule::getUUID();
+      lInstanceMap->storeInstance(resultUUID, oPreparedStatement);
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new SingletonItemSequence(result));
-}
+      result = theFactory->createAnyURI(resultUUID);
 
-}}; // namespace zorba, jdbc
+      JDBC_MODULE_CATCH;
+
+      return ItemSequence_t(new SingletonItemSequence(result));
+    }
+
+  }
+}; // namespace zorba, jdbc

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,55 +17,69 @@
 #include "connectionoptions.h"
 #include "jdbc.h"
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
 
-ItemSequence_t
-ConnectionOptionsFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lStrUUID = JdbcModule::getStringArg(args, 0);
+    ItemSequence_t
+    ConnectionOptionsFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const
+    {
+      String lStrUUID = JdbcModule::getStringArg(args, 0);
 
-  CHECK_CONNECTION
-  Item result;
+      CHECK_CONNECTION;
+      Item result;
 
-  JDBC_MODULE_TRY
+      JDBC_MODULE_TRY;
 
-    jobject oConnection = JdbcModule::getObject(aDynamincContext, lStrUUID, INSTANCE_MAP_CONNECTIONS);
+      jobject oConnection = JdbcModule::getObject(aDynamincContext, lStrUUID,
+                                                  INSTANCE_MAP_CONNECTIONS);
 
-    std::vector<std::pair<Item, Item> > resultVector;
+      std::vector <std::pair<Item, Item>> resultVector;
 
-    jboolean isAutocommit = env->CallBooleanMethod(oConnection, jConnection.getAutoCommit);
-    resultVector.push_back(std::pair<Item, Item>(theFactory->createString("autocommit"), theFactory->createBoolean(isAutocommit==JNI_TRUE)));
-    CHECK_EXCEPTION
-    jboolean isReadonly = env->CallBooleanMethod(oConnection, jConnection.isReadOnly);
-    resultVector.push_back(std::pair<Item, Item>(theFactory->createString("readonly"), theFactory->createBoolean(isReadonly==JNI_TRUE)));
-    CHECK_EXCEPTION
+      jboolean isAutocommit = env->CallBooleanMethod(oConnection,
+                                                     jConnection.getAutoCommit);
+      resultVector.push_back(
+          std::pair<Item, Item>(theFactory->createString("autocommit"),
+                                theFactory->createBoolean(
+                                    isAutocommit == JNI_TRUE)));
+      CHECK_EXCEPTION;
+      jboolean isReadonly = env->CallBooleanMethod(oConnection,
+                                                   jConnection.isReadOnly);
+      resultVector.push_back(
+          std::pair<Item, Item>(theFactory->createString("readonly"),
+                                theFactory->createBoolean(
+                                    isReadonly == JNI_TRUE)));
+      CHECK_EXCEPTION;
 
-    int isolationLevel = env->CallIntMethod(oConnection, jConnection.getTransactionIsolation);
-    CHECK_EXCEPTION
-    String isolLevel;
-    if (isolationLevel==jConnection.TRANSACTION_NONE) {
-      isolLevel = "NOT-SUPPORTED";
-    } else if (isolationLevel==jConnection.TRANSACTION_READ_UNCOMMITTED) {
-      isolLevel = "READ-UNCOMMITTED";
-    } else if (isolationLevel==jConnection.TRANSACTION_READ_COMMITTED) {
-      isolLevel = "READ-COMMITTED";
-    } else if (isolationLevel==jConnection.TRANSACTION_REPEATABLE_READ) {
-      isolLevel = "REPEATABLE-READ";
-    } else if (isolationLevel==jConnection.TRANSACTION_SERIALIZABLE) {
-      isolLevel = "SERIALIZABLE";
+      int isolationLevel =
+          env->CallIntMethod(
+              oConnection,
+              jConnection.getTransactionIsolation);
+      CHECK_EXCEPTION;
+      String isolLevel;
+      if (isolationLevel == jConnection.TRANSACTION_NONE) {
+        isolLevel = "NOT-SUPPORTED";
+      } else if (isolationLevel == jConnection.TRANSACTION_READ_UNCOMMITTED) {
+        isolLevel = "READ-UNCOMMITTED";
+      } else if (isolationLevel == jConnection.TRANSACTION_READ_COMMITTED) {
+        isolLevel = "READ-COMMITTED";
+      } else if (isolationLevel == jConnection.TRANSACTION_REPEATABLE_READ) {
+        isolLevel = "REPEATABLE-READ";
+      } else if (isolationLevel == jConnection.TRANSACTION_SERIALIZABLE) {
+        isolLevel = "SERIALIZABLE";
+      }
+      resultVector.push_back(
+          std::pair<Item, Item>(theFactory->createString("isolation-level"),
+                                theFactory->createString(isolLevel)));
+      result = theFactory->createJSONObject(resultVector);
+
+      JDBC_MODULE_CATCH;
+
+      return ItemSequence_t(new SingletonItemSequence(result));
     }
-    resultVector.push_back(std::pair<Item, Item>(theFactory->createString("isolation-level"), theFactory->createString(isolLevel)));
-    result = theFactory->createJSONObject(resultVector);
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new SingletonItemSequence(result));
-}
-
-}}; // namespace zorba, jdbc
+  }
+}; // namespace zorba, jdbc

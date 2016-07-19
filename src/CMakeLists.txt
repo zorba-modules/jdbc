@@ -1,4 +1,4 @@
-# Copyright 2006-2012 The FLWOR Foundation.
+# Copyright 2006-2016 The FLWOR Foundation.
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ INCLUDE_DIRECTORIES (${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 INCLUDE_DIRECTORIES (${JAVA_INCLUDE_PATH})
 
 DECLARE_ZORBA_MODULE (
-  URI "http://www.zorba-xquery.com/modules/jdbc"
-  VERSION 1.0
+  URI "http://zorba.io/modules/jdbc"
+  VERSION 1.1
   FILE "jdbc.xq"
   LINK_LIBRARIES "${JAVA_JVM_LIBRARY}" ${zorba_util-jvm_module_LIBRARIES})

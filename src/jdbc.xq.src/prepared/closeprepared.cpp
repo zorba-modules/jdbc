@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,23 @@
 #include "jdbc.h"
 #include <zorba/singleton_item_sequence.h>
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
+    ItemSequence_t
+    ClosePreparedFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lStatementUUID = JdbcModule::getStringArg(args, 0);
 
-ItemSequence_t
-ClosePreparedFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lStatementUUID = JdbcModule::getStringArg(args, 0);
+      CHECK_CONNECTION;
 
-  CHECK_CONNECTION
+      JdbcModule::deleteObject(aDynamincContext, lStatementUUID,
+                               INSTANCE_MAP_PREPAREDSTATEMENTS);
 
-  JdbcModule::deleteObject(aDynamincContext, lStatementUUID, INSTANCE_MAP_PREPAREDSTATEMENTS);
+      return ItemSequence_t(new EmptySequence());
+    }
 
-  return ItemSequence_t(new EmptySequence());
-}
-
-}}; // namespace zorba, jdbc
+  }
+}; // namespace zorba, jdbc

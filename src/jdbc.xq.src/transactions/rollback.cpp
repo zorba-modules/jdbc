@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,30 @@
 #include "rollback.h"
 #include "jdbc.h"
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
+    ItemSequence_t
+    RollbackFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lConnectionUUID = JdbcModule::getStringArg(args, 0);
 
-ItemSequence_t
-RollbackFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lConnectionUUID = JdbcModule::getStringArg(args, 0);
+      CHECK_CONNECTION;
 
-  CHECK_CONNECTION
+      JDBC_MODULE_TRY;
+      jobject oConnection = JdbcModule::getObject(aDynamincContext,
+                                                  lConnectionUUID,
+                                                  INSTANCE_MAP_CONNECTIONS);
 
-  JDBC_MODULE_TRY
-    jobject oConnection = JdbcModule::getObject(aDynamincContext, lConnectionUUID, INSTANCE_MAP_CONNECTIONS);
+      env->CallVoidMethod(oConnection, jConnection.rollback);
+      CHECK_EXCEPTION;
 
-    env->CallVoidMethod(oConnection, jConnection.rollback);
-    CHECK_EXCEPTION
+      JDBC_MODULE_CATCH;
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new EmptySequence());
-}
+      return ItemSequence_t(new EmptySequence());
+    }
 
-}}; // namespace zorba, jdbc
+  }
+}; // namespace zorba, jdbc

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,31 +17,34 @@
 #include "isconnected.h"
 #include "jdbc.h"
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
 
-ItemSequence_t
-IsConnectedFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lConnectionUUID = JdbcModule::getStringArg(args, 0);
+    ItemSequence_t
+    IsConnectedFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const
+    {
+      String lConnectionUUID = JdbcModule::getStringArg(args, 0);
 
-  CHECK_CONNECTION  
-  jboolean isClosed = JNI_FALSE;
-  JDBC_MODULE_TRY
+      CHECK_CONNECTION;
+      jboolean isClosed = JNI_FALSE;
+      JDBC_MODULE_TRY;
 
-    jobject oConnection = JdbcModule::getObject(aDynamincContext, lConnectionUUID, INSTANCE_MAP_CONNECTIONS);
+      jobject oConnection = JdbcModule::getObject(aDynamincContext,
+                                                  lConnectionUUID,
+                                                  INSTANCE_MAP_CONNECTIONS);
 
-    isClosed = env->CallBooleanMethod(oConnection, jConnection.isClosed);
-    CHECK_EXCEPTION
+      isClosed = env->CallBooleanMethod(oConnection, jConnection.isClosed);
+      CHECK_EXCEPTION;
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new SingletonItemSequence(theFactory->createBoolean(isClosed==JNI_FALSE)));
-}
+          JDBC_MODULE_CATCH;
 
-}}; // namespace zorba, jdbc
+      return ItemSequence_t(new SingletonItemSequence(
+          theFactory->createBoolean(isClosed == JNI_FALSE)));
+    }
+
+  }
+}; // namespace zorba, jdbc

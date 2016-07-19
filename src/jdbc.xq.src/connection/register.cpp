@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "clearparams.h"
+#include "register.h"
 #include "jdbc.h"
 
 namespace zorba {
@@ -22,29 +22,44 @@ namespace zorba {
 
 
     ItemSequence_t
-    ClearParamsFunction::evaluate(
+    RegisterFunction::evaluate(
         const ExternalFunction::Arguments_t &args,
         const zorba::StaticContext *aStaticContext,
         const zorba::DynamicContext *aDynamincContext) const {
-      String lStatementUUID = JdbcModule::getStringArg(args, 0);
-
-      CHECK_CONNECTION;
+      JdbcModule::initGlobals(aStaticContext);
       Item result;
-
       JDBC_MODULE_TRY;
-      jobject oPreparedStatement =
-          JdbcModule::getObject(aDynamincContext,
-                                lStatementUUID,
-                                INSTANCE_MAP_PREPAREDSTATEMENTS);
+      jstring driverName(NULL);
+      Item item = JdbcModule::getItemArg(args, 0);
+      bool hasUsername = false;
+      if (item.isJSONItem()) {
+        Iterator_t lKeys = item.getObjectKeys();
+        lKeys->open();
+        Item lKey;
+        while (lKeys->next(lKey)) {
+          zorba::String keystring = lKey.getStringValue();
+          zorba::String value = item.getObjectValue(keystring).getStringValue();
+          if (keystring == "driver") {
+            driverName = env->NewStringUTF(value.c_str());
+            CHECK_EXCEPTION;
+          }
+        }
+        lKeys->close();
+      }
 
-      env->CallVoidMethod(oPreparedStatement,
-                          jPreparedStatement.clearParameters);
-      CHECK_EXCEPTION;
+      jobject oRegister;
+      if (driverName) {
+        oRegister = env->CallStaticObjectMethod(
+            jClass.classID,
+            jClass.forName,
+            driverName);
+        CHECK_EXCEPTION;
+      }
 
       JDBC_MODULE_CATCH;
-
       return ItemSequence_t(new EmptySequence());
     }
+
 
   }
 }; // namespace zorba, jdbc

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,38 +19,41 @@
 #include "jsonitemsequence.h"
 #include <zorba/singleton_item_sequence.h>
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
 
-ItemSequence_t
-ExecuteUpdateFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lConnectionUUID = JdbcModule::getStringArg(args, 0);
-  String lQuery = JdbcModule::getStringArg(args, 1);
+    ItemSequence_t
+    ExecuteUpdateFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lConnectionUUID = JdbcModule::getStringArg(args, 0);
+      String lQuery = JdbcModule::getStringArg(args, 1);
 
-  CHECK_CONNECTION
-  Item result;
+      CHECK_CONNECTION;
+      Item result;
 
-  JDBC_MODULE_TRY
-    
-    jobject oConnection = JdbcModule::getObject(aDynamincContext, lConnectionUUID, INSTANCE_MAP_CONNECTIONS);
+      JDBC_MODULE_TRY;
 
-    jobject oStatement = env->CallObjectMethod(oConnection, jConnection.createStatement);
-    CHECK_EXCEPTION
+      jobject oConnection = JdbcModule::getObject(aDynamincContext,
+                                                  lConnectionUUID,
+                                                  INSTANCE_MAP_CONNECTIONS);
 
-    jstring query =  env->NewStringUTF(lQuery.c_str());
-    int executionResult = env->CallIntMethod(oStatement, jStatement.executeUpdate, query );
-    CHECK_EXCEPTION
-    result = theFactory->createInt(executionResult);
+      jobject oStatement = env->CallObjectMethod(oConnection,
+                                                 jConnection.createStatement);
+      CHECK_EXCEPTION;
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new SingletonItemSequence(result));
-}
+      jstring query = env->NewStringUTF(lQuery.c_str());
+      int executionResult = env->CallIntMethod(oStatement,
+                                               jStatement.executeUpdate, query);
+      CHECK_EXCEPTION;
+      result = theFactory->createInt(executionResult);
 
-}}; // namespace zorba, jdbc
+      JDBC_MODULE_CATCH;
+
+      return ItemSequence_t(new SingletonItemSequence(result));
+    }
+
+  }
+}; // namespace zorba, jdbc

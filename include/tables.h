@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
+#ifndef ZORBA_JDBC_MODULE_TABLES_H
+#define ZORBA_JDBC_MODULE_TABLES_H
 
 #include <zorba/empty_sequence.h>
 #include <zorba/external_module.h>
@@ -22,48 +25,47 @@
 #include "JavaVMSingleton.h"
 
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
-class TablesFunction : public ContextualExternalFunction
-{
-  private:
-    const ExternalModule* theModule;
-    ItemFactory* theFactory;
-    XmlDataManager* theDataManager;
-
-  public:
-    TablesFunction(const ExternalModule* aModule);
-
-    virtual ~TablesFunction();
-
-  public:
-    virtual String getURI() const;
-
-    virtual String getLocalName() const;
-
-    virtual ItemSequence_t 
-      evaluate(const ExternalFunction::Arguments_t& args,
-               const zorba::StaticContext*,
-               const zorba::DynamicContext*) const;
-};
-
-class TablesNondeterministicFunction : public TablesFunction
-{
-  public:
-    TablesNondeterministicFunction(const ExternalModule* aModule):
-      TablesFunction(aModule)
-    {};
-
-    virtual ~TablesNondeterministicFunction() {};
-
-  public:
-    virtual String getLocalName() const
+    class TablesFunction : public ContextualExternalFunction
     {
-      return "tables-nondeterministic";
-    }
-};
+    private:
+      const ExternalModule *theModule;
+      ItemFactory *theFactory;
+      XmlDataManager *theDataManager;
 
-}} // namespace zorba, jdbc
+    public:
+      TablesFunction(const ExternalModule *aModule);
+
+      virtual ~TablesFunction();
+
+    public:
+      virtual String getURI() const;
+
+      virtual String getLocalName() const;
+
+      virtual ItemSequence_t
+          evaluate(const ExternalFunction::Arguments_t &args,
+                   const zorba::StaticContext *,
+                   const zorba::DynamicContext *) const;
+    };
+
+    class TablesNondeterministicFunction : public TablesFunction
+    {
+    public:
+      TablesNondeterministicFunction(const ExternalModule *aModule) :
+          TablesFunction(aModule) { };
+
+      virtual ~TablesNondeterministicFunction() { };
+
+    public:
+      virtual String getLocalName() const {
+        return "tables-nondeterministic";
+      }
+    };
+
+  }
+} // namespace zorba, jdbc
+
+#endif //ZORBA_JDBC_MODULE_TABLES_H

@@ -1,12 +1,12 @@
 /*
  * Copyright 2006-2016 The FLWOR Foundation.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 #pragma once
-#ifndef ZORBA_JDBC_MODULE_EXECUTEUPDATEPREPARED_H
-#define ZORBA_JDBC_MODULE_EXECUTEUPDATEPREPARED_H
+#ifndef ZORBA_JDBC_MODULE_CLOSE_H
+#define ZORBA_JDBC_MODULE_CLOSE_H
 
 #include <zorba/empty_sequence.h>
 #include <zorba/external_module.h>
 #include <zorba/item_factory.h>
+#include <zorba/singleton_item_sequence.h>
 #include <zorba/zorba.h>
 
 #include "JavaVMSingleton.h"
@@ -28,7 +29,7 @@
 namespace zorba {
   namespace jdbc {
 
-    class ExecuteUpdatePreparedFunction : public ContextualExternalFunction
+    class CloseFunction : public ContextualExternalFunction
     {
     private:
       const ExternalModule *theModule;
@@ -36,17 +37,17 @@ namespace zorba {
       XmlDataManager *theDataManager;
 
     public:
-      ExecuteUpdatePreparedFunction(const ExternalModule *aModule) :
+      CloseFunction(const ExternalModule *aModule) :
           theModule(aModule),
           theFactory(Zorba::getInstance(0)->getItemFactory()),
           theDataManager(Zorba::getInstance(0)->getXmlDataManager()) { }
 
-      ~ExecuteUpdatePreparedFunction() { }
+      ~CloseFunction() { }
 
     public:
       virtual String getURI() const { return theModule->getURI(); }
 
-      virtual String getLocalName() const { return "execute-update-prepared"; }
+      virtual String getLocalName() const { return "close"; }
 
       virtual ItemSequence_t
           evaluate(const ExternalFunction::Arguments_t &args,
@@ -58,4 +59,5 @@ namespace zorba {
   }
 }; // namespace zorba, jdbc
 
-#endif //ZORBA_JDBC_MODULE_EXECUTEUPDATEPREPARED_H
+
+#endif //ZORBA_JDBC_MODULE_CLOSE_H

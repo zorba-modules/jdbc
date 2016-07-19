@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,128 +14,162 @@
  * limitations under the License.
  */
 #pragma once
-#ifndef JAVA_IDS
-#define JAVA_IDS
+#ifndef ZORBA_JDBC_MODULE_JAVAIDS_H
+#define ZORBA_JDBC_MODULE_JAVAIDS_H
 
 #include "JavaVMSingleton.h"
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
-class JavaDriverManager {
-public:
-  bool init();
-  jclass classID;
-  jmethodID getConnection;
-  jmethodID getConnectionWithUser;
+    class JavaClass
+    {
+    public:
+      bool init();
 
-};
-class JavaConnection {
-public:
-  bool init();
-  jclass classID;
-  jmethodID commit;
-  jmethodID rollback;
-  jmethodID setAutoCommit;
-  jmethodID setReadOnly;
-  jmethodID setTransactionIsolation;
-  jmethodID getAutoCommit;
-  jmethodID isReadOnly;
-  int TRANSACTION_NONE;
-  int TRANSACTION_READ_UNCOMMITTED;
-  int TRANSACTION_READ_COMMITTED;
-  int TRANSACTION_REPEATABLE_READ;
-  int TRANSACTION_SERIALIZABLE;
-  jmethodID getTransactionIsolation;
-  jmethodID isClosed;
-  jmethodID close;
-  jmethodID createStatement;
-  jmethodID prepareStatement;
-  jmethodID getMetadata;	
-};
-class JavaStatement {
-public:
-  bool init();
-  jclass classID;
-  jmethodID getUpdateCount;
-  jmethodID getResultSet;
-  jmethodID execute;
-  jmethodID executeQuery;
-  jmethodID executeUpdate;
-};
-class JavaResultSet {
-public:
-  bool init();
-  jclass classID;
-  jmethodID last;
-  jmethodID getRow;
-  jmethodID getMetaData;
-  jmethodID beforeFirst;
-  jmethodID next;
-  jmethodID getInt;
-  jmethodID getBoolean;
-  jmethodID getDouble;
-  jmethodID getString;
-  jmethodID getBLOB;
-};
-class JavaResultSetMetadata {
-public:
-  bool init();
-  jclass classID;
-  jmethodID getColumnCount;
-  jmethodID getColumnType;
-  jmethodID getColumnName;
-  jmethodID getColumnTypeName;
-  jmethodID isAutoIncrement;
-  jmethodID isNullable;
+      jclass classID;
+      jmethodID forName;
+    };
 
-  int COLUMN_NO_NULLS;
-  int COLUMN_NULLABLE;
-  int COLUMN_NULLABLE_UNKNOWN;
-};
-class JavaPreparedStatement {
-public:
-  bool init();
-  jclass classID;
-  jmethodID clearParameters;
-  jmethodID execute;
-  jmethodID executeQuery;
-  jmethodID executeUpdate;
-  jmethodID getParameterMetaData;
-  jmethodID getUpdateCount;
-  jmethodID getResultSet;
-  jmethodID setBoolean;
-  jmethodID setNull;
-  jmethodID setDouble;
-  jmethodID setFloat;
-  jmethodID setLong;
-  jmethodID setString;
-};
-class JavaParameterMetadata {
-public:
-  bool init();
-  jclass classID;
-  jmethodID getParameterCount;
-  jmethodID getParameterTypeName;
-  jmethodID getParameterClassName;
-  jmethodID getParameterType;
-};
-class JavaBlob {
-public:
-  bool init();
-  jclass classID;
-  jmethodID getBytes;
-  jmethodID length;
-};
-class JavaDatabaseMetadata {
-public:
-  bool init();
-  jclass classID;
-  jmethodID getTables;
-};
+    class JavaDriverManager
+    {
+    public:
+      bool init();
 
-}}; // namespace zorba, jdbc
+      jclass classID;
+      jmethodID getConnection;
+      jmethodID getConnectionWithUser;
+      jmethodID registerDriver;
+    };
 
-#endif
+    class JavaConnection
+    {
+    public:
+      bool init();
+
+      jclass classID;
+      jmethodID commit;
+      jmethodID rollback;
+      jmethodID setAutoCommit;
+      jmethodID setReadOnly;
+      jmethodID setTransactionIsolation;
+      jmethodID getAutoCommit;
+      jmethodID isReadOnly;
+      int TRANSACTION_NONE;
+      int TRANSACTION_READ_UNCOMMITTED;
+      int TRANSACTION_READ_COMMITTED;
+      int TRANSACTION_REPEATABLE_READ;
+      int TRANSACTION_SERIALIZABLE;
+      jmethodID getTransactionIsolation;
+      jmethodID isClosed;
+      jmethodID close;
+      jmethodID createStatement;
+      jmethodID prepareStatement;
+      jmethodID getMetadata;
+    };
+
+    class JavaStatement
+    {
+    public:
+      bool init();
+
+      jclass classID;
+      jmethodID getUpdateCount;
+      jmethodID getResultSet;
+      jmethodID execute;
+      jmethodID executeQuery;
+      jmethodID executeUpdate;
+    };
+
+    class JavaResultSet
+    {
+    public:
+      bool init();
+
+      jclass classID;
+      jmethodID last;
+      jmethodID getRow;
+      jmethodID getMetaData;
+      jmethodID beforeFirst;
+      jmethodID next;
+      jmethodID getInt;
+      jmethodID getBoolean;
+      jmethodID getDouble;
+      jmethodID getString;
+      jmethodID getBLOB;
+    };
+
+    class JavaResultSetMetadata
+    {
+    public:
+      bool init();
+
+      jclass classID;
+      jmethodID getColumnCount;
+      jmethodID getColumnType;
+      jmethodID getColumnName;
+      jmethodID getColumnTypeName;
+      jmethodID isAutoIncrement;
+      jmethodID isNullable;
+
+      int COLUMN_NO_NULLS;
+      int COLUMN_NULLABLE;
+      int COLUMN_NULLABLE_UNKNOWN;
+    };
+
+    class JavaPreparedStatement
+    {
+    public:
+      bool init();
+
+      jclass classID;
+      jmethodID clearParameters;
+      jmethodID execute;
+      jmethodID executeQuery;
+      jmethodID executeUpdate;
+      jmethodID getParameterMetaData;
+      jmethodID getUpdateCount;
+      jmethodID getResultSet;
+      jmethodID setBoolean;
+      jmethodID setNull;
+      jmethodID setDouble;
+      jmethodID setFloat;
+      jmethodID setLong;
+      jmethodID setString;
+    };
+
+    class JavaParameterMetadata
+    {
+    public:
+      bool init();
+
+      jclass classID;
+      jmethodID getParameterCount;
+      jmethodID getParameterTypeName;
+      jmethodID getParameterClassName;
+      jmethodID getParameterType;
+    };
+
+    class JavaBlob
+    {
+    public:
+      bool init();
+
+      jclass classID;
+      jmethodID getBytes;
+      jmethodID length;
+    };
+
+    class JavaDatabaseMetadata
+    {
+    public:
+      bool init();
+
+      jclass classID;
+      jmethodID getTables;
+    };
+
+  }
+}; // namespace zorba, jdbc
+
+#endif //ZORBA_JDBC_MODULE_JAVAIDS_H

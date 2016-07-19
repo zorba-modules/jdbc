@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
+#ifndef ZORBA_JDBC_MODULE_PREPAREDSTATEMENT_H
+#define ZORBA_JDBC_MODULE_PREPAREDSTATEMENT_H
 
 #include <zorba/empty_sequence.h>
 #include <zorba/external_module.h>
@@ -22,42 +25,37 @@
 #include "JavaVMSingleton.h"
 
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
-class PrepareStatementFunction : public ContextualExternalFunction
-{
-  private:
-    const ExternalModule* theModule;
-    ItemFactory* theFactory;
-    XmlDataManager* theDataManager;
+    class PrepareStatementFunction : public ContextualExternalFunction
+    {
+    private:
+      const ExternalModule *theModule;
+      ItemFactory *theFactory;
+      XmlDataManager *theDataManager;
 
-  public:
-    PrepareStatementFunction(const ExternalModule* aModule) :
-      theModule(aModule),
-      theFactory(Zorba::getInstance(0)->getItemFactory()),
-      theDataManager(Zorba::getInstance(0)->getXmlDataManager())
-    {}
+    public:
+      PrepareStatementFunction(const ExternalModule *aModule) :
+          theModule(aModule),
+          theFactory(Zorba::getInstance(0)->getItemFactory()),
+          theDataManager(Zorba::getInstance(0)->getXmlDataManager()) { }
 
-    ~PrepareStatementFunction()
-    {}
+      ~PrepareStatementFunction() { }
 
-  public:
-    virtual String getURI() const
-    { return theModule->getURI(); }
+    public:
+      virtual String getURI() const { return theModule->getURI(); }
 
-    virtual String getLocalName() const
-    { return "prepare-statement"; }
+      virtual String getLocalName() const { return "prepare-statement"; }
 
-    virtual ItemSequence_t 
-      evaluate(const ExternalFunction::Arguments_t& args,
-               const zorba::StaticContext*,
-               const zorba::DynamicContext*) const;
-};
+      virtual ItemSequence_t
+          evaluate(const ExternalFunction::Arguments_t &args,
+                   const zorba::StaticContext *,
+                   const zorba::DynamicContext *) const;
+    };
 
 
+  }
+}; // namespace zorba, jdbc
 
-}}; // namespace zorba, jdbc
-
+#endif //ZORBA_JDBC_MODULE_PREPAREDSTATEMENT_H

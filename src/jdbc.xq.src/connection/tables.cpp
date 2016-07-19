@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,72 +18,70 @@
 #include "jdbc.h"
 #include "jsonitemsequence.h"
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
-TablesFunction::TablesFunction(const ExternalModule* aModule)
-  : theModule(aModule),
-    theFactory(Zorba::getInstance(0)->getItemFactory()),
-    theDataManager(Zorba::getInstance(0)->getXmlDataManager())
-{}
+    TablesFunction::TablesFunction(const ExternalModule *aModule)
+        : theModule(aModule),
+          theFactory(Zorba::getInstance(0)->getItemFactory()),
+          theDataManager(Zorba::getInstance(0)->getXmlDataManager()) { }
 
-TablesFunction::~TablesFunction()
-{}
+    TablesFunction::~TablesFunction() { }
 
-String
-TablesFunction::getURI() const
-{
-  return theModule->getURI();
-}
-
-String
-TablesFunction::getLocalName() const
-{
-  return "tables";
-}
-
-ItemSequence_t
-TablesFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lStrUUID = JdbcModule::getStringArg(args, 0);
-
-  CHECK_CONNECTION
-  jobject result=NULL;
-
-  JDBC_MODULE_TRY
-
-    jobject oConnection = JdbcModule::getObject(aDynamincContext, lStrUUID, INSTANCE_MAP_CONNECTIONS);
-
-    jobject oDatabaseMetadata = env->CallObjectMethod(oConnection, jConnection.getMetadata);
-
-    String sTemp;
-    jstring jCatalog = NULL;
-    if (JdbcModule::getOptionalStringArg(args, 1, sTemp))
-    {
-      jCatalog = env->NewStringUTF(sTemp.c_str());
+    String
+    TablesFunction::getURI() const {
+      return theModule->getURI();
     }
-    jstring jSchema = NULL;
-    if (JdbcModule::getOptionalStringArg(args, 2, sTemp))
-    {
-      jSchema = env->NewStringUTF(sTemp.c_str());
-    }
-    jstring jTable = NULL;
-    if (JdbcModule::getOptionalStringArg(args, 3, sTemp))
-    {
-      jTable = env->NewStringUTF(sTemp.c_str());
-    }
-    jobjectArray jTypes = env->NewObjectArray(1, env->FindClass("java/lang/String"), env->NewStringUTF("TABLE"));
-    
-    result = env->CallObjectMethod(oDatabaseMetadata, jDatabaseMetadata.getTables, jCatalog, jSchema, jTable, jTypes);
-    CHECK_EXCEPTION
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new JSONItemSequence(result));
-}
+    String
+    TablesFunction::getLocalName() const {
+      return "tables";
+    }
 
-}}; // namespace zorba, jdbc
+    ItemSequence_t
+    TablesFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lStrUUID = JdbcModule::getStringArg(args, 0);
+
+      CHECK_CONNECTION;
+      jobject result = NULL;
+
+      JDBC_MODULE_TRY;
+
+      jobject oConnection = JdbcModule::getObject(aDynamincContext, lStrUUID,
+                                                  INSTANCE_MAP_CONNECTIONS);
+
+      jobject oDatabaseMetadata =
+          env->CallObjectMethod(oConnection,
+                                jConnection.getMetadata);
+
+      String sTemp;
+      jstring jCatalog = NULL;
+      if (JdbcModule::getOptionalStringArg(args, 1, sTemp))
+        jCatalog = env->NewStringUTF(sTemp.c_str());
+
+      jstring jSchema = NULL;
+      if (JdbcModule::getOptionalStringArg(args, 2, sTemp))
+        jSchema = env->NewStringUTF(sTemp.c_str());
+
+      jstring jTable = NULL;
+      if (JdbcModule::getOptionalStringArg(args, 3, sTemp))
+        jTable = env->NewStringUTF(sTemp.c_str());
+
+      jobjectArray jTypes = env->NewObjectArray(1, env->FindClass(
+          "java/lang/String"), env->NewStringUTF("TABLE"));
+
+      result = env->CallObjectMethod(oDatabaseMetadata,
+                                     jDatabaseMetadata.getTables, jCatalog,
+                                     jSchema, jTable, jTypes);
+      CHECK_EXCEPTION;
+
+      JDBC_MODULE_CATCH;
+
+      return ItemSequence_t(new JSONItemSequence(result));
+    }
+
+  }
+}; // namespace zorba, jdbc

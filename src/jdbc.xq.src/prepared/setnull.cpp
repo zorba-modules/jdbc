@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,38 +17,47 @@
 #include "setnull.h"
 #include "jdbc.h"
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
+    ItemSequence_t
+    SetNullFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lStatementUUID = JdbcModule::getStringArg(args, 0);
 
-ItemSequence_t
-SetNullFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lStatementUUID = JdbcModule::getStringArg(args, 0);
+      CHECK_CONNECTION;
+      Item result;
 
-  CHECK_CONNECTION
-  Item result;
+      JDBC_MODULE_TRY;
+      jobject oPreparedStatement =
+          JdbcModule::getObject(aDynamincContext,
+                                lStatementUUID,
+                                INSTANCE_MAP_PREPAREDSTATEMENTS);
 
-  JDBC_MODULE_TRY
-    jobject oPreparedStatement = JdbcModule::getObject(aDynamincContext, lStatementUUID, INSTANCE_MAP_PREPAREDSTATEMENTS);
+      jobject oParameterMetadata =
+          env->CallObjectMethod(oPreparedStatement,
+                                jPreparedStatement.getParameterMetaData);
+      CHECK_EXCEPTION;
 
-    jobject oParameterMetadata = env->CallObjectMethod(oPreparedStatement, jPreparedStatement.getParameterMetaData);
-    CHECK_EXCEPTION
+      long index = (long) JdbcModule::getItemArg(args, 1).getLongValue();
+      int parameterType =
+          env->CallIntMethod(oParameterMetadata,
+                             jParameterMetadata.getParameterType,
+                             index);
+      CHECK_EXCEPTION;
 
-    long index = (long)JdbcModule::getItemArg(args, 1).getLongValue();
-    int parameterType = env->CallIntMethod(oParameterMetadata, jParameterMetadata.getParameterType, index);
-    CHECK_EXCEPTION
+      env->CallVoidMethod(oPreparedStatement,
+                          jPreparedStatement.setNull,
+                          index,
+                          parameterType);
+      CHECK_EXCEPTION;
 
-    env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setNull, index, parameterType);
-    CHECK_EXCEPTION
+      JDBC_MODULE_CATCH;
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new EmptySequence());
-}
+      return ItemSequence_t(new EmptySequence());
+    }
 
-}}; // namespace zorba, jdbc
+  }
+}; // namespace zorba, jdbc

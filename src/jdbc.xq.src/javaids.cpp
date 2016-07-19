@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,14 @@ namespace zorba
 namespace jdbc
 {
 
+  bool JavaClass::init() {
+    classID = env->FindClass("java/lang/Class");
+    forName = env->GetStaticMethodID(classID, "forName", "(Ljava/lang/String;)Ljava/lang/Class;");
+    return true;
+  }
   bool JavaDriverManager::init() {
     classID = env->FindClass("java/sql/DriverManager");
+    registerDriver = env->GetStaticMethodID(classID, "registerDriver", "(Ljava/sql/Driver;)V");
     getConnection = env->GetStaticMethodID(classID, "getConnection", "(Ljava/lang/String;)Ljava/sql/Connection;");
     getConnectionWithUser = env->GetStaticMethodID(classID, "getConnection", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/sql/Connection;");
     return true;

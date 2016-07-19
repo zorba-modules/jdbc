@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,40 +19,43 @@
 
 using namespace zorba::store;
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
 
-ItemSequence_t
-  SetStringFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lStatementUUID = JdbcModule::getStringArg(args, 0);
+    ItemSequence_t
+    SetStringFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lStatementUUID = JdbcModule::getStringArg(args, 0);
 
-  CHECK_CONNECTION
-  Item result;
+      CHECK_CONNECTION;
+      Item result;
 
-  JDBC_MODULE_TRY
-    jobject oPreparedStatement = JdbcModule::getObject(aDynamincContext, lStatementUUID, INSTANCE_MAP_PREPAREDSTATEMENTS);
+      JDBC_MODULE_TRY;
+      jobject oPreparedStatement =
+          JdbcModule::getObject(aDynamincContext,
+                                lStatementUUID,
+                                INSTANCE_MAP_PREPAREDSTATEMENTS);
 
-    long index = (long)JdbcModule::getItemArg(args, 1).getLongValue();
-    Item value = JdbcModule::getItemArg(args, 2);
-    int type = value.getTypeCode();
+      long index = (long) JdbcModule::getItemArg(args, 1).getLongValue();
+      Item value = JdbcModule::getItemArg(args, 2);
+      int type = value.getTypeCode();
 
-    if (type == XS_STRING) {
-      jstring val =  env->NewStringUTF(value.getStringValue().c_str());
-      env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setString, index, val);
-    } else {
-      JdbcModule::throwError("SQL004", "Error setting string value.");
+      if (type == XS_STRING) {
+        jstring val = env->NewStringUTF(value.getStringValue().c_str());
+        env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setString,
+                            index, val);
+      } else {
+        JdbcModule::throwError("SQL004", "Error setting string value.");
+      }
+      CHECK_EXCEPTION;
+
+      JDBC_MODULE_CATCH;
+
+      return ItemSequence_t(new EmptySequence());
     }
-    CHECK_EXCEPTION
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new EmptySequence());
-}
-
-}}; // namespace zorba, jdbc
+  }
+}; // namespace zorba, jdbc

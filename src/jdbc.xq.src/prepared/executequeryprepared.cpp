@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,31 +18,34 @@
 #include "jdbc.h"
 #include "jsonitemsequence.h"
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
 
-ItemSequence_t
-ExecuteQueryPreparedFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lStatementUUID = JdbcModule::getStringArg(args, 0);
+    ItemSequence_t
+    ExecuteQueryPreparedFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lStatementUUID = JdbcModule::getStringArg(args, 0);
 
-  CHECK_CONNECTION
-  jobject result=NULL;
+      CHECK_CONNECTION;
+      jobject result = NULL;
 
-  JDBC_MODULE_TRY
-    jobject oPreparedStatement = JdbcModule::getObject(aDynamincContext, lStatementUUID, INSTANCE_MAP_PREPAREDSTATEMENTS);
+      JDBC_MODULE_TRY;
+      jobject oPreparedStatement =
+          JdbcModule::getObject(aDynamincContext,
+                                lStatementUUID,
+                                INSTANCE_MAP_PREPAREDSTATEMENTS);
 
-    result = env->CallObjectMethod(oPreparedStatement, jPreparedStatement.executeQuery);
-    CHECK_EXCEPTION
+      result = env->CallObjectMethod(oPreparedStatement,
+                                     jPreparedStatement.executeQuery);
+      CHECK_EXCEPTION;
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new JSONItemSequence(result));
-}
+      JDBC_MODULE_CATCH;
 
-}}; // namespace zorba, jdbc
+      return ItemSequence_t(new JSONItemSequence(result));
+    }
+
+  }
+}; // namespace zorba, jdbc

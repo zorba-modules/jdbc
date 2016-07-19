@@ -1,7 +1,7 @@
 xquery version "3.0";
 
 (:
- : Copyright 2006-2012 The FLWOR Foundation.
+ : Copyright 2006-2016 The FLWOR Foundation.
  :
  : Licensed under the Apache License, Version 2.0 (the "License");
  : you may not use this file except in compliance with the License.
@@ -50,12 +50,12 @@ xquery version "3.0";
  : @project DB Drivers/JDBC
  :)
 
-module namespace jdbc = "http://www.zorba-xquery.com/modules/jdbc";
+module namespace jdbc = "http://zorba.io/modules/jdbc";
 
 declare namespace err = "http://www.w3.org/2005/xqt-errors";
 declare namespace ver = "http://zorba.io/options/versioning";
 declare namespace an = "http://zorba.io/annotations";
-declare option ver:module-version "1.0";
+declare option ver:module-version "1.1";
 
 (:~
  : This variable represents the NOT-SUPPORTED level for Isolation Levels in $options for 2.2 connect function.
@@ -77,6 +77,31 @@ declare variable $jdbc:REPEATABLE-READ  := "REPEATABLE-READ";
  : This variable represents the SERIALIZABLE level for Isolation Levels in $options for 2.2 connect function.
  :)
 declare variable $jdbc:SERIALIZABLE     := "SERIALIZABLE";
+
+(:
+ : 1 JDBC RELATED
+ :)
+(:~
+ : Register JDBC Driver
+ :
+ : <p>This function is used to register the Java JDBC Driver to be used.</p>
+ :
+ : @param $jdbc-driver json object that has the driver name.
+ : @option "driverName" Name of the driver to load into the JVM.
+ :
+ : @error SQL40003 Isolation level not supported.
+ : @error SQL001 Descriptive error, see attached message.
+ :
+ : @return Return nothing.
+ :
+ : jdbc-driver example:
+ : {
+ :   "driverName" : "oracle.jdbc.driver.OracleDriver"
+ : }
+ :
+ :)
+declare function jdbc:register(
+                         $jdbc-driver as object() ) as xs:anyURI external;
 
 (:
  : 2 CONNECTION HANDLING
@@ -199,7 +224,7 @@ declare function jdbc:connect(
  :
  : @see <a href="#determinism">Notice about determinism</a>
  :
- : @param $connection-config json object that has the host and user informations.
+ : @param $connection-config json object that has the host and user information.
  : @option "url" URL of the server, this option must be specified and should be declared according to JDBC specification.
  : @option "user" username for the server, this option is optional.
  : @option "password" password for the server, this option is optional.
@@ -230,7 +255,7 @@ declare %an:nondeterministic function jdbc:connect-nondeterministic(
 (:~
  : Verify if a connection is still active.
  :
- : @param $connection-id The identifier to the connection to be verify.
+ : @param $connection-id The identifier to the connection to be verified.
  :
  : @error SQL08003 Connection doesn't exist
  : @error SQL001 Descriptive error, see error in attached message
@@ -243,7 +268,7 @@ declare function jdbc:is-connected(
 (:~
  : Returns a set with options for a specified connection.
  :
- : @param $connection-id The identifier to the connection to be verify.
+ : @param $connection-id The identifier to the connection to be verified.
  :
  : @error SQL08003 Connection doesn't exist
  : @error SQL08000 Connection is closed
@@ -260,6 +285,21 @@ declare function jdbc:is-connected(
 declare function jdbc:connection-options(
                                       $connection-id as xs:anyURI) as object() external;
 
+(:~
+ : Closes the connection.
+ :
+ : @param $connection-id The identifier to the connection to close.
+ :
+ : @error SQL08003 Connection doesn't exist
+ : @error SQL08000 Connection is closed
+ : @error SQL001 Descriptive error, see error in attached message
+ :
+ : @return This function returns an empty-sequence()
+ :
+ :)
+declare function jdbc:close(
+                            $connection-id as xs:anyURI) as empty-sequence() external;
+
 (:
  : 3 TRANSACTIONS
  :)
@@ -267,7 +307,7 @@ declare function jdbc:connection-options(
 (:~
  : Commit current transaction from an active connection.
  :
- : @param $connection-id The identifier to the connection to be commited.
+ : @param $connection-id The identifier to the connection to commit.
  : 
  : @error SQL08003 Connection doesn't exist
  : @error SQL08000 Connection is closed

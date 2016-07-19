@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,71 +19,85 @@
 
 using namespace zorba::store;
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
+    ItemSequence_t
+    SetValueFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lStatementUUID = JdbcModule::getStringArg(args, 0);
 
-ItemSequence_t
-SetValueFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lStatementUUID = JdbcModule::getStringArg(args, 0);
+      CHECK_CONNECTION;
+      Item result;
 
-  CHECK_CONNECTION
-  Item result;
+      JDBC_MODULE_TRY;
+      jobject oPreparedStatement =
+          JdbcModule::getObject(aDynamincContext,
+                                lStatementUUID,
+                                INSTANCE_MAP_PREPAREDSTATEMENTS);
 
-  JDBC_MODULE_TRY
-    jobject oPreparedStatement = JdbcModule::getObject(aDynamincContext, lStatementUUID, INSTANCE_MAP_PREPAREDSTATEMENTS);
+      long index = (long) JdbcModule::getItemArg(args, 1).getLongValue();
+      Item value = JdbcModule::getItemArg(args, 2);
+      int type = value.getTypeCode();
 
-    long index = (long)JdbcModule::getItemArg(args, 1).getLongValue();
-    Item value = JdbcModule::getItemArg(args, 2);
-    int type = value.getTypeCode();
-
-    switch (type) {
-      case XS_DOUBLE:
-        env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setDouble, index, value.getDoubleValue());
-      break;
-      case XS_FLOAT:
-        env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setFloat, index, value.getDoubleValue());
-        break;
-      case XS_INTEGER:
-        env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setLong, index, value.getLongValue());
-        break;
-      case XS_DECIMAL: {
-        double dVal;
-        sscanf(value.getStringValue().c_str(), "%lf", &dVal);
-        env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setDouble, index,  dVal);
-        break;
+      switch (type) {
+        case XS_DOUBLE:
+          env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setDouble,
+                              index, value.getDoubleValue());
+          break;
+        case XS_FLOAT:
+          env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setFloat,
+                              index, value.getDoubleValue());
+          break;
+        case XS_INTEGER:
+          env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setLong,
+                              index, value.getLongValue());
+          break;
+        case XS_DECIMAL: {
+          double dVal;
+          sscanf(value.getStringValue().c_str(), "%lf", &dVal);
+          env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setDouble,
+                              index, dVal);
+          break;
+        }
+        case XS_BOOLEAN: {
+          jboolean boolval = JNI_FALSE;
+          if (value.getBooleanValue())
+            boolval = JNI_TRUE;
+          env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setBoolean,
+                              index, boolval);
+          break;
+        }
+        case JS_NULL: {
+          jobject oParameterMetadata =
+              env->CallObjectMethod(oPreparedStatement,
+                                    jPreparedStatement.getParameterMetaData);
+          CHECK_EXCEPTION;
+          int parameterType =
+              env->CallIntMethod(oParameterMetadata,
+                                 jParameterMetadata.getParameterType,
+                                 index);
+          CHECK_EXCEPTION;
+          env->CallVoidMethod(oPreparedStatement,
+                              jPreparedStatement.setNull,
+                              index, parameterType);
+          CHECK_EXCEPTION;
+          break;
+        }
+        default: { // STRING
+          jstring stringval = env->NewStringUTF(value.getStringValue().c_str());
+          env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setString,
+                              index, stringval);
+          break;
+        }
       }
-      case XS_BOOLEAN: {
-        jboolean boolval = JNI_FALSE;
-        if (value.getBooleanValue())
-          boolval = JNI_TRUE;
-        env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setBoolean, index, boolval);
-        break;
-      }
-      case JS_NULL: {
-        jobject oParameterMetadata = env->CallObjectMethod(oPreparedStatement, jPreparedStatement.getParameterMetaData);
-        CHECK_EXCEPTION;
-        int parameterType = env->CallIntMethod(oParameterMetadata, jParameterMetadata.getParameterType, index);
-        CHECK_EXCEPTION;
-        env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setNull, index, parameterType);
-        CHECK_EXCEPTION;
-        break;
-      }
-      default: { // STRING
-        jstring stringval =  env->NewStringUTF(value.getStringValue().c_str());
-        env->CallVoidMethod(oPreparedStatement, jPreparedStatement.setString, index, stringval);
-        break;
-      }
+      CHECK_EXCEPTION;
+      JDBC_MODULE_CATCH;
+
+      return ItemSequence_t(new EmptySequence());
     }
-    CHECK_EXCEPTION
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new EmptySequence());
-}
 
-}} // namespace zorba, jdbc
+  }
+} // namespace zorba, jdbc

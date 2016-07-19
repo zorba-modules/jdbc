@@ -1,12 +1,12 @@
 /*
  * Copyright 2006-2016 The FLWOR Foundation.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
-#include "clearparams.h"
+#include "close.h"
 #include "jdbc.h"
+#include "jsonitemsequence.h"
 
 namespace zorba {
   namespace jdbc {
 
 
     ItemSequence_t
-    ClearParamsFunction::evaluate(
+    CloseFunction::evaluate(
         const ExternalFunction::Arguments_t &args,
         const zorba::StaticContext *aStaticContext,
         const zorba::DynamicContext *aDynamincContext) const {
-      String lStatementUUID = JdbcModule::getStringArg(args, 0);
+
+      String lConnectionUUID = JdbcModule::getStringArg(args, 0);
 
       CHECK_CONNECTION;
-      Item result;
-
       JDBC_MODULE_TRY;
-      jobject oPreparedStatement =
-          JdbcModule::getObject(aDynamincContext,
-                                lStatementUUID,
-                                INSTANCE_MAP_PREPAREDSTATEMENTS);
 
-      env->CallVoidMethod(oPreparedStatement,
-                          jPreparedStatement.clearParameters);
+      jobject oConnection = JdbcModule::getObject(aDynamincContext,
+                                                  lConnectionUUID,
+                                                  INSTANCE_MAP_CONNECTIONS);
+      env->CallVoidMethod(oConnection, jConnection.close);
       CHECK_EXCEPTION;
 
       JDBC_MODULE_CATCH;

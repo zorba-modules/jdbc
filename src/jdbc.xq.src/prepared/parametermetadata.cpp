@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,68 +18,85 @@
 #include "jdbc.h"
 #include <zorba/singleton_item_sequence.h>
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
 
-ItemSequence_t
-ParameterMetadataFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lStatementUUID = JdbcModule::getStringArg(args, 0);
+    ItemSequence_t
+    ParameterMetadataFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lStatementUUID = JdbcModule::getStringArg(args, 0);
 
-  CHECK_CONNECTION
-  Item result;
+      CHECK_CONNECTION;
+      Item result;
 
-  JDBC_MODULE_TRY
-    jobject oPreparedStatement = JdbcModule::getObject(aDynamincContext, lStatementUUID, INSTANCE_MAP_PREPAREDSTATEMENTS);
+      JDBC_MODULE_TRY;
+      jobject oPreparedStatement =
+          JdbcModule::getObject(aDynamincContext,
+                                lStatementUUID,
+                                INSTANCE_MAP_PREPAREDSTATEMENTS);
 
-    jobject oParameterMetaData = env->CallObjectMethod(oPreparedStatement, jPreparedStatement.getParameterMetaData);
-    CHECK_EXCEPTION
+      jobject oParameterMetaData =
+          env->CallObjectMethod(oPreparedStatement,
+                                jPreparedStatement.getParameterMetaData);
+      CHECK_EXCEPTION;
 
-    int columns = env->CallIntMethod(oParameterMetaData, jParameterMetadata.getParameterCount);
-    CHECK_EXCEPTION
+      int columns = env->CallIntMethod(oParameterMetaData,
+                                       jParameterMetadata.getParameterCount);
+      CHECK_EXCEPTION;
 
-    zorba::ItemFactory* itemFactory = Zorba::getInstance(0)->getItemFactory();
-    std::vector<zorba::Item> elements;
+      zorba::ItemFactory *itemFactory = Zorba::getInstance(0)->getItemFactory();
+      std::vector <zorba::Item> elements;
 
-    for (int i=1; i<=columns; i++) {
-        std::vector<std::pair<zorba::Item, zorba::Item> > column;
+      for (int i = 1; i <= columns; i++) {
+        std::vector <std::pair<zorba::Item, zorba::Item>> column;
 
-        jstring oName = (jstring) env->CallObjectMethod(oParameterMetaData, jParameterMetadata.getParameterClassName, i);
-        CHECK_EXCEPTION
-        const char * cName = env->GetStringUTFChars(oName, 0);
-        CHECK_EXCEPTION
+        jstring oName =
+            (jstring) env->CallObjectMethod(
+                oParameterMetaData,
+                jParameterMetadata.getParameterClassName,
+                i);
+        CHECK_EXCEPTION;
+        const char *cName = env->GetStringUTFChars(oName, 0);
+        CHECK_EXCEPTION;
         String sName(cName);
         zorba::Item iName = itemFactory->createString(sName);
-        std::pair<zorba::Item, zorba::Item> pName(itemFactory->createString("name"), iName);
+        std::pair <zorba::Item, zorba::Item> pName(
+            itemFactory->createString("name"), iName);
         column.push_back(pName);
         env->ReleaseStringUTFChars(oName, cName);
-        CHECK_EXCEPTION 
+        CHECK_EXCEPTION;
 
-        jstring oType = (jstring) env->CallObjectMethod(oParameterMetaData, jParameterMetadata.getParameterTypeName, i);
-        CHECK_EXCEPTION
-        const char * cType = env->GetStringUTFChars(oType, 0);
-        CHECK_EXCEPTION 
-        String  sType(cType);
+        jstring oType =
+            (jstring) env->CallObjectMethod(
+                oParameterMetaData,
+                jParameterMetadata.getParameterTypeName,
+                i);
+        CHECK_EXCEPTION;
+        const char *cType = env->GetStringUTFChars(oType, 0);
+        CHECK_EXCEPTION;
+        String sType(cType);
         zorba::Item iType = itemFactory->createString(sType);
-        std::pair<zorba::Item, zorba::Item> pType(itemFactory->createString("type"), iType);
+        std::pair <zorba::Item, zorba::Item> pType(
+            itemFactory->createString("type"), iType);
         column.push_back(pType);
         elements.push_back(itemFactory->createJSONObject(column));
         env->ReleaseStringUTFChars(oType, cType);
-        CHECK_EXCEPTION 
+        CHECK_EXCEPTION;
+      }
+      std::pair <zorba::Item, zorba::Item> allColumns(
+          itemFactory->createString("columns"),
+          itemFactory->createJSONArray(elements));
+      std::vector <std::pair<zorba::Item, zorba::Item>> vResult;
+      vResult.push_back(allColumns);
+      result = itemFactory->createJSONObject(vResult);
+
+      JDBC_MODULE_CATCH;
+
+      return ItemSequence_t(new SingletonItemSequence(result));
     }
-    std::pair<zorba::Item, zorba::Item> allColumns(itemFactory->createString("columns"), itemFactory->createJSONArray(elements));
-    std::vector<std::pair<zorba::Item, zorba::Item> > vResult;
-    vResult.push_back(allColumns);
-    result = itemFactory->createJSONObject(vResult);
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new SingletonItemSequence(result));
-}
-
-}}; // namespace zorba, jdbc
+  }
+}; // namespace zorba, jdbc

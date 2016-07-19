@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,43 +18,45 @@
 #include "jdbc.h"
 #include <zorba/singleton_item_sequence.h>
 
-namespace zorba
-{
-namespace jdbc
-{
+namespace zorba {
+  namespace jdbc {
 
+    ItemSequence_t
+    ExecuteFunction::evaluate(
+        const ExternalFunction::Arguments_t &args,
+        const zorba::StaticContext *aStaticContext,
+        const zorba::DynamicContext *aDynamincContext) const {
+      String lConnectionUUID = JdbcModule::getStringArg(args, 0);
+      String lQuery = JdbcModule::getStringArg(args, 1);
 
-ItemSequence_t
-ExecuteFunction::evaluate(const ExternalFunction::Arguments_t& args,
-                           const zorba::StaticContext* aStaticContext,
-                           const zorba::DynamicContext* aDynamincContext) const
-{
-  String lConnectionUUID = JdbcModule::getStringArg(args, 0);
-  String lQuery = JdbcModule::getStringArg(args, 1);
+      CHECK_CONNECTION;
+      Item result;
 
-  CHECK_CONNECTION
-  Item result;
+      JDBC_MODULE_TRY;
 
-  JDBC_MODULE_TRY
+      jobject oConnection = JdbcModule::getObject(aDynamincContext,
+                                                  lConnectionUUID,
+                                                  INSTANCE_MAP_CONNECTIONS);
 
-    jobject oConnection = JdbcModule::getObject(aDynamincContext, lConnectionUUID, INSTANCE_MAP_CONNECTIONS);
+      jobject oStatement = env->CallObjectMethod(oConnection,
+                                                 jConnection.createStatement);
+      CHECK_EXCEPTION;
 
-    jobject oStatement = env->CallObjectMethod(oConnection, jConnection.createStatement);
-    CHECK_EXCEPTION
+      jstring query = env->NewStringUTF(lQuery.c_str());
+      env->CallBooleanMethod(oStatement, jStatement.execute, query);
+      CHECK_EXCEPTION;
 
-    jstring query =  env->NewStringUTF(lQuery.c_str());
-    env->CallBooleanMethod(oStatement, jStatement.execute, query);
-    CHECK_EXCEPTION
+      InstanceMap *lInstanceMap = JdbcModule::getCreateInstanceMap(
+          aDynamincContext, INSTANCE_MAP_STATEMENTS);
+      String resultUUID = JdbcModule::getUUID();
+      lInstanceMap->storeInstance(resultUUID, oStatement);
 
-    InstanceMap* lInstanceMap = JdbcModule::getCreateInstanceMap(aDynamincContext, INSTANCE_MAP_STATEMENTS);
-    String resultUUID = JdbcModule::getUUID();
-    lInstanceMap->storeInstance(resultUUID, oStatement);
+      result = theFactory->createAnyURI(resultUUID);
 
-    result = theFactory->createAnyURI(resultUUID);
+      JDBC_MODULE_CATCH;
 
-  JDBC_MODULE_CATCH
-  
-  return ItemSequence_t(new SingletonItemSequence(result));
-}
+      return ItemSequence_t(new SingletonItemSequence(result));
+    }
 
-}}; // namespace zorba, jdbc
+  }
+}; // namespace zorba, jdbc

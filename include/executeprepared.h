@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2012 The FLWOR Foundation.
+ * Copyright 2006-2016 The FLWOR Foundation.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
+#ifndef ZORBA_JDBC_MODULE_EXECUTEPREPARED_H
+#define ZORBA_JDBC_MODULE_EXECUTEPREPARED_H
 
 #include <zorba/empty_sequence.h>
 #include <zorba/external_module.h>
@@ -61,3 +64,4 @@ class ExecutePreparedFunction : public ContextualExternalFunction
 
 }}; // namespace zorba, jdbc
 
+#endif //ZORBA_JDBC_MODULE_EXECUTEPREPARED_H
